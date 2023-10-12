@@ -6,78 +6,80 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.*;
 
 public class MyGdxGame extends ApplicationAdapter {
-    Stage stage;
-    Skin skin;
-    int pokemonCounter = 0, itemCounter = 0, cashCounter = 0;
-    SpriteBatch batch;
-    Button button1, button2, button3;
-    BitmapFont bitmapFont1, bitmapFont2, bitmapFont3;
+
+    private Viewport viewport;
+    private Stage stage;
+    private Skin skin;
+    private int pokemonCounter = 0, itemCounter = 0, cashCounter = 0;
+    private SpriteBatch batch;
+    private BitmapFont pokemonBitmapFont, itemBitmapFont, cashBitmapFont;
 
     @Override
     public void create() {
-        stage = new Stage();
-        Gdx.input.setInputProcessor(stage);
-        skin = new Skin(Gdx.files.internal("neon-ui.json"));
 
-        button1 = new TextButton("Pokemon", skin, "default");
-        button1.setBounds(50, 50, 100, 50);
-        button1.addListener(new ChangeListener() {
+        viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch = new SpriteBatch();
+        skin = new Skin(Gdx.files.internal("neon-ui.json"));
+        stage = new Stage(viewport, batch);
+        Gdx.input.setInputProcessor(stage);
+
+        Button pokemonButton = new TextButton("Pokemon", skin, "default");
+        pokemonButton.setBounds(Gdx.graphics.getWidth() * 0.1f, Gdx.graphics.getHeight() * 0.1f, 100, 50);
+        pokemonButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 pokemonCounter++;
                 System.out.println("Pokemon Count : " + pokemonCounter);
             }
         });
+        pokemonBitmapFont = new BitmapFont();
 
-        button2 = new TextButton("Item", skin, "default");
-        button2.setBounds(200, 50, 100, 50);
-        button2.addListener(new ChangeListener() {
+        Button itemButton = new TextButton("Item", skin, "default");
+        itemButton.setBounds(Gdx.graphics.getWidth() * 0.4f, Gdx.graphics.getHeight() * 0.1f, 100, 50);
+        itemButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 itemCounter++;
                 System.out.println("Item Count : " + itemCounter);
             }
         });
+        itemBitmapFont = new BitmapFont();
 
-        button3 = new TextButton("Cash", skin, "default");
-        button3.setBounds(350, 50, 100, 50);
-        button3.addListener(new ChangeListener() {
+        Button cashButton = new TextButton("Cash", skin, "default");
+        cashButton.setBounds(Gdx.graphics.getWidth() * 0.7f, Gdx.graphics.getHeight() * 0.1f, 100, 50);
+        cashButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 cashCounter++;
                 System.out.println("Cash Count : " + cashCounter);
             }
         });
+        cashBitmapFont = new BitmapFont();
 
-        stage.addActor(button1);
-        stage.addActor(button2);
-        stage.addActor(button3);
+        stage.addActor(pokemonButton);
+        stage.addActor(itemButton);
+        stage.addActor(cashButton);
 
-        batch = new SpriteBatch();
-        initializeFont();
-    }
-
-    private void initializeFont() {
-        bitmapFont1 = new BitmapFont();
-        bitmapFont2 = new BitmapFont();
-        bitmapFont3 = new BitmapFont();
     }
 
     @Override
     public void render() {
         ScreenUtils.clear(0, 0, 0, 1);
+
+        viewport.apply();
+
         batch.begin();
-        bitmapFont1.draw(batch, "Pokemon Count : " + pokemonCounter, 200, 400);
-        bitmapFont2.draw(batch, "Item Count : " + itemCounter, 200, 300);
-        bitmapFont3.draw(batch, "Cash Count : " + cashCounter, 200, 200);
+        pokemonBitmapFont.draw(batch, "Pokemon Count : " + pokemonCounter, 200, 400);
+        itemBitmapFont.draw(batch, "Item Count : " + itemCounter, 200, 300);
+        cashBitmapFont.draw(batch, "Cash Count : " + cashCounter, 200, 200);
         batch.end();
+
         stage.act();
         stage.draw();
     }
@@ -85,12 +87,15 @@ public class MyGdxGame extends ApplicationAdapter {
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
-        stage.getViewport().update(width, height);
+        viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
         stage.getViewport().apply();
     }
 
     @Override
     public void dispose() {
         batch.dispose();
+        stage.dispose();
+        skin.dispose();
     }
 }
